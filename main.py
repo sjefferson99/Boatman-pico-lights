@@ -1,4 +1,3 @@
-from calendar import leapdays
 from machine import Pin
 from i2c_responder import I2CResponder
 from time import sleep, sleep_ms
