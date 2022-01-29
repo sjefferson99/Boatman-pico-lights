@@ -18,6 +18,19 @@ def debug(message):
     if debugEnable:
         print(message)
 
+def format_hex(_object):
+    """Format a value or list of values as 2 digit hex."""
+    try:
+        values_hex = [to_hex(value) for value in _object]
+        return '[{}]'.format(', '.join(values_hex))
+    except TypeError:
+        # The object is a single value
+        return to_hex(_object)
+
+
+def to_hex(value):
+    return '0x{:02X}'.format(value)
+
 #Flashes configured LED pin passed
 def flash(led, count, pause=1):
     j = 0
@@ -43,8 +56,7 @@ def read_i2c(i2c_port):
         flash(led, 2, 1)
 
         buffer_in = i2c_port.get_write_data(max_size=8) #returns list of bytes
-        debug("Responder: Received I2C WRITE data:" + buffer_in)
-        
+                
         return buffer_in
     
     else:
@@ -149,26 +161,36 @@ set_group_duties(led_groups[current_group])
 #Configure PWM outputs
 set_led_duties(leds, led_duty)
 
+data = []
+i2c_data = []
+string = ""
+
 #Main program loop
 debug("Starting program loop")
 while True:
-    data = []
-    
     #check for I2C data
     i2c_data = read_i2c(i2c_port)
     if i2c_data:
-        data.append(i2c_data)
+        for byte in i2c_data:
+            data.append(byte)
+        debug(i2c_data)
 
     elif data:
         debug("I2C data read into buffer")
-        if i2c_data == "x":
+        if chr(data[0]) == "x":
             print("x")
             #read bank and value and update config and PWM
-        elif i2c_data == "y":
+        elif chr(data[0]) == "y":
             print("y")
         else:
             print("Unrecognised command")
             print(data)
+            for byte in data:
+                string = string + chr(byte)
+        
+        print(string)
+        data = []
+        string = ""
     
     else:
         pass
