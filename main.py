@@ -185,35 +185,35 @@ while True:
     elif data:
         debug("I2C data read into buffer")
         
-        if chr(data[0]) == "A": #Set exclusive light to value
-            debug("Command A - Set all lights to 0 and set the specified light to the specified value")
+        if data[0] == 1: #Set exclusive light to value
+            debug("Command 1 - Set all lights to 0 and set the specified light to the specified value")
             ledID = data[1]
             debug(ledID)
-            ledDuty = (data[2] * max_duty / 255)
+            ledDuty = int(data[2] * max_duty / 255)
             debug(data[2])
             debug(ledDuty)
 
             set_all_zero()
-            leds[ledID] = ledDuty
+            led_duty[ledID] = ledDuty
 
             set_led_duties()
         
-        elif chr(data[0]) == "B": #Set additive light to value
-            debug("Command B - Maintain current light configuration and adjust the specified light to the specified value")
+        elif data[0] == 2: #Set additive light to value
+            debug("Command 2 - Maintain current light configuration and adjust the specified light to the specified value")
 
-        elif chr(data[0]) == "C": #Set exclusive group to value
-            debug("Command C - Set all lights to 0 and set the specified group to the specified value")
+        elif data[0] == 3: #Set exclusive group to value
+            debug("Command 3 - Set all lights to 0 and set the specified group to the specified value")
             
-        elif chr(data[0]) == "D": #Set additive group to value
-            debug("Command D - Maintain current light configuration and adjust the specified group to the specified value")
+        elif data[0] == 4: #Set additive group to value
+            debug("Command 4 - Maintain current light configuration and adjust the specified group to the specified value")
 
         else:
             print("Unrecognised command")
             print(data)
             for byte in data:
                 string = string + chr(byte)
-        
-        print(string)
+            print("ASCII: {}".format(string))
+            
         data = []
         string = ""
     
