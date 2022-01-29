@@ -37,13 +37,12 @@ def send_serial(serial, serialdata):
   serial.write(serialdata.encode('utf-8'))
   return 0
 
-#Read I2C if data available - return data or False if no data
+#Read I2C if data available - return data up to 8 bytes from I2C input buffer or False if no data
 def read_i2c(i2c_port):
     if i2c_port.write_data_is_available():
         flash(led, 2, 1)
 
-        buffer_in = []
-        buffer_in = i2c_port.get_write_data(max_size=9)
+        buffer_in = i2c_port.get_write_data(max_size=8) #returns list of bytes
         debug("Responder: Received I2C WRITE data:" + buffer_in)
         
         return buffer_in
@@ -153,9 +152,14 @@ set_led_duties(leds, led_duty)
 #Main program loop
 debug("Starting program loop")
 while True:
+    data = []
+    
     #check for I2C data
     i2c_data = read_i2c(i2c_port)
     if i2c_data:
+        data.append(i2c_data)
+
+    elif data:
         debug("I2C data read into buffer")
         if i2c_data == "x":
             print("x")
@@ -164,7 +168,11 @@ while True:
             print("y")
         else:
             print("Unrecognised command")
-
+            print(data)
+    
+    else:
+        pass
+    
     #Check for quit command on UART
     serialdata = serial.read()
 
