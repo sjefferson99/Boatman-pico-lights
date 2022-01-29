@@ -123,33 +123,33 @@ led.off()
 
 #LED-pwm config
 print("init external LEDs")
-ext_led1 = PWM(Pin(0))
-ext_led1.freq(1000)
-ext_led2 = PWM(Pin(1))
-ext_led3 = PWM(Pin(2))
-ext_led3.freq(1000)
-ext_led4 = PWM(Pin(3))
-ext_led5 = PWM(Pin(6))
-ext_led5.freq(1000)
-ext_led6 = PWM(Pin(7))
-ext_led7 = PWM(Pin(8))
-ext_led7.freq(1000)
-ext_led8 = PWM(Pin(9))
-ext_led9 = PWM(Pin(10))
-ext_led9.freq(1000)
-ext_led10 = PWM(Pin(11))
-ext_led11 = PWM(Pin(12))
-ext_led11.freq(1000)
-ext_led12 = PWM(Pin(13))
-ext_led13 = PWM(Pin(14))
-ext_led13.freq(1000)
-ext_led14 = PWM(Pin(15))
-ext_led15 = PWM(Pin(20))
-ext_led15.freq(1000)
-ext_led16 = PWM(Pin(21))
+ext_led0 = PWM(Pin(0))
+ext_led0.freq(1000)
+ext_led1 = PWM(Pin(1))
+ext_led2 = PWM(Pin(2))
+ext_led2.freq(1000)
+ext_led3 = PWM(Pin(3))
+ext_led4 = PWM(Pin(6))
+ext_led4.freq(1000)
+ext_led5 = PWM(Pin(7))
+ext_led6 = PWM(Pin(8))
+ext_led6.freq(1000)
+ext_led7 = PWM(Pin(9))
+ext_led8 = PWM(Pin(10))
+ext_led8.freq(1000)
+ext_led9 = PWM(Pin(11))
+ext_led10 = PWM(Pin(12))
+ext_led10.freq(1000)
+ext_led11 = PWM(Pin(13))
+ext_led12 = PWM(Pin(14))
+ext_led12.freq(1000)
+ext_led13 = PWM(Pin(15))
+ext_led14 = PWM(Pin(20))
+ext_led14.freq(1000)
+ext_led15 = PWM(Pin(21))
 
 global leds
-leds = {1: ext_led1, 2: ext_led2, 3: ext_led3, 4: ext_led4, 5: ext_led5, 6: ext_led6, 7: ext_led7, 8: ext_led8, 9: ext_led9, 10: ext_led10, 11: ext_led11, 12: ext_led12, 13: ext_led13, 14: ext_led4, 15: ext_led15, 16: ext_led16}
+leds = {0: ext_led0, 1: ext_led1, 2: ext_led2, 3: ext_led3, 4: ext_led4, 5: ext_led5, 6: ext_led6, 7: ext_led7, 8: ext_led8, 9: ext_led9, 10: ext_led10, 11: ext_led11, 12: ext_led12, 13: ext_led13, 14: ext_led4, 15: ext_led15}
 
 #Define LED groups
 led_groups = {1: {"label": "All", "members": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]}, 2: {"label": "All white", "members": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}, 3: {"label": "All red", "members": [11, 12]}, 4: {"label": "saloon", "members": [1, 2, 3, 4, 5]}}
@@ -177,6 +177,10 @@ string = ""
 #Main program loop
 debug("Starting program loop")
 while True:
+    error = False
+    data = []
+    string = ""
+    
     #TODO set groupConfigInSync = False if group config changed since last master sync request
     
     #check for I2C data
@@ -189,68 +193,36 @@ while True:
     elif data:
         debug("I2C data read into buffer")
         
-        if data[0] == 1: #Set exclusive light to value
-            debug("Command 1 - Set all lights to 0 and set the specified light to the specified value")
+        #01GRIIII Set LED values
+        if data[0] & 64: #Set a value comand resgister
             
-            ledID = data[1]
-            debug(ledID)
-            ledDuty = int(data[2] * max_duty / 255)
-            debug(data[2])
+            id = data[0] & 0b00001111
+            debug(id)
+            ledDuty = int(data[1] * max_duty / 255)
+            debug(data[1])
             debug(ledDuty)
 
-            set_all_zero()
-            led_duty[ledID] = ledDuty
-
-            set_led_duties()
-        
-        elif data[0] == 2: #Set additive light to value
-            debug("Command 2 - Maintain current light configuration and adjust the specified light to the specified value")
-
-            ledID = data[1]
-            debug(ledID)
-            ledDuty = int(data[2] * max_duty / 255)
-            debug(data[2])
-            debug(ledDuty)
-
-            led_duty[ledID] = ledDuty
-
-            set_led_duties()
-
-        elif data[0] == 3: #Set exclusive group to value
-            debug("Command 3 - Set all lights to 0 and set the specified group to the specified value")
-
-            if groupConfigInSync:
-                groupID = data[1]
-                debug(groupID)
-                ledDuty = int(data[2] * max_duty / 255)
-                debug(data[2])
-                debug(ledDuty)
-
+            if data[0] & 0b00010000: #Clear other duty cycles if reset bit set
+                debug("Clear other duty values")
                 set_all_zero()
-                set_group_duties(led_groups[groupID], ledDuty)
-
-                set_led_duties()
-
-            else:
-                print("Group config not in sync")
-
-        elif data[0] == 4: #Set additive group to value
-            debug("Command 4 - Maintain current light configuration and adjust the specified group to the specified value")
-
-            if groupConfigInSync:
-                groupID = data[1]
-                debug(groupID)
-                ledDuty = int(data[2] * max_duty / 255)
-                debug(data[2])
-                debug(ledDuty)
-
-                set_group_duties(led_groups[groupID], ledDuty)
-
-                set_led_duties()
+            
+            if data[0] & 0b00100000: #group config
+                if groupConfigInSync:
+                    set_group_duties(led_groups[id], ledDuty)
+                            
+                else:
+                    print("ERROR: Group config not in sync")
+                    error = True
                 
             else:
-                print("Group config not in sync")
+                led_duty[id] = ledDuty #Single light config
 
+            if not error:
+                set_led_duties()
+            
+            else:
+                print ("Set command not applied due to error")
+        
         else:
             print("Unrecognised command")
             print(data)
@@ -258,9 +230,6 @@ while True:
                 string = string + chr(byte)
             print("ASCII: {}".format(string))
             
-        data = []
-        string = ""
-    
     else:
         pass
     
