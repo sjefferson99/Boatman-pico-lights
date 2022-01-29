@@ -81,7 +81,7 @@ def i2c_send(i2c_port, send_data):
 
 #Configure duties for a group
 def set_group_duties(group, duty=max_duty):
-    for led in group:
+    for led in group["members"]:
         led_duty[led] = duty
 
 #Set all lights to 0
@@ -152,7 +152,7 @@ global leds
 leds = {1: ext_led1, 2: ext_led2, 3: ext_led3, 4: ext_led4, 5: ext_led5, 6: ext_led6, 7: ext_led7, 8: ext_led8, 9: ext_led9, 10: ext_led10, 11: ext_led11, 12: ext_led12, 13: ext_led13, 14: ext_led4, 15: ext_led15, 16: ext_led16}
 
 #Define LED groups
-led_groups = {"all": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16], "all_white": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], "all_red": [11, 12], "saloon": [1, 2, 3, 4, 5]}
+led_groups = {1: {"label": "All", "members": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]}, 2: {"label": "All white", "members": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}, 3: {"label": "All red", "members": [11, 12]}, 4: {"label": "saloon", "members": [1, 2, 3, 4, 5]}}
 
 #Set default LED duties
 #TODO maybe a constructor makes this from enabled LEDs and value = 0 or max for default group
@@ -161,7 +161,7 @@ led_duty = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0, 10: 0, 11: 0, 
 
 #TODO read default group and values from persistent storage/server
 #Default selected group
-current_group = "saloon"
+current_group = 4
 #Set LEDs in default group on
 set_group_duties(led_groups[current_group])
 
@@ -187,6 +187,7 @@ while True:
         
         if data[0] == 1: #Set exclusive light to value
             debug("Command 1 - Set all lights to 0 and set the specified light to the specified value")
+            
             ledID = data[1]
             debug(ledID)
             ledDuty = int(data[2] * max_duty / 255)
@@ -201,11 +202,42 @@ while True:
         elif data[0] == 2: #Set additive light to value
             debug("Command 2 - Maintain current light configuration and adjust the specified light to the specified value")
 
+            ledID = data[1]
+            debug(ledID)
+            ledDuty = int(data[2] * max_duty / 255)
+            debug(data[2])
+            debug(ledDuty)
+
+            led_duty[ledID] = ledDuty
+
+            set_led_duties()
+
         elif data[0] == 3: #Set exclusive group to value
             debug("Command 3 - Set all lights to 0 and set the specified group to the specified value")
+
+            groupID = data[1]
+            debug(groupID)
+            ledDuty = int(data[2] * max_duty / 255)
+            debug(data[2])
+            debug(ledDuty)
+
+            set_all_zero()
+            set_group_duties(groupID, ledDuty)
+
+            set_led_duties()
             
         elif data[0] == 4: #Set additive group to value
             debug("Command 4 - Maintain current light configuration and adjust the specified group to the specified value")
+
+            groupID = data[1]
+            debug(groupID)
+            ledDuty = int(data[2] * max_duty / 255)
+            debug(data[2])
+            debug(ledDuty)
+
+            set_group_duties(groupID, ledDuty)
+
+            set_led_duties()
 
         else:
             print("Unrecognised command")
