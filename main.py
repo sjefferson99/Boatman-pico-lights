@@ -84,8 +84,13 @@ def set_group_duties(group, duty=max_duty):
     for led in group:
         led_duty[led] = duty
 
+#Set all lights to 0
+def set_all_zero():
+    for led in leds:
+        led_duty[led] = 0
+
 #Set PWM config
-def set_led_duties(leds, led_duty):
+def set_led_duties():
     for led in leds:
         leds[led].duty_u16(led_duty[led])
         
@@ -143,6 +148,7 @@ ext_led15 = PWM(Pin(20))
 ext_led15.freq(1000)
 ext_led16 = PWM(Pin(21))
 
+global leds
 leds = {1: ext_led1, 2: ext_led2, 3: ext_led3, 4: ext_led4, 5: ext_led5, 6: ext_led6, 7: ext_led7, 8: ext_led8, 9: ext_led9, 10: ext_led10, 11: ext_led11, 12: ext_led12, 13: ext_led13, 14: ext_led4, 15: ext_led15, 16: ext_led16}
 
 #Define LED groups
@@ -150,6 +156,7 @@ led_groups = {"all": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16], "a
 
 #Set default LED duties
 #TODO maybe a constructor makes this from enabled LEDs and value = 0 or max for default group
+global led_duty
 led_duty = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0, 10: 0, 11: 0, 12: 0, 13: 0, 14: 0, 15: 0, 16: 0}
 
 #TODO read default group and values from persistent storage/server
@@ -159,7 +166,7 @@ current_group = "saloon"
 set_group_duties(led_groups[current_group])
 
 #Configure PWM outputs
-set_led_duties(leds, led_duty)
+set_led_duties()
 
 data = []
 i2c_data = []
@@ -177,11 +184,29 @@ while True:
 
     elif data:
         debug("I2C data read into buffer")
-        if chr(data[0]) == "x":
-            print("x")
-            #read bank and value and update config and PWM
-        elif chr(data[0]) == "y":
-            print("y")
+        
+        if chr(data[0]) == "A": #Set exclusive light to value
+            debug("Command A - Set all lights to 0 and set the specified light to the specified value")
+            ledID = data[1]
+            debug(ledID)
+            ledDuty = (data[2] * max_duty / 255)
+            debug(data[2])
+            debug(ledDuty)
+
+            set_all_zero()
+            leds[ledID] = ledDuty
+
+            set_led_duties()
+        
+        elif chr(data[0]) == "B": #Set additive light to value
+            debug("Command B - Maintain current light configuration and adjust the specified light to the specified value")
+
+        elif chr(data[0]) == "C": #Set exclusive group to value
+            debug("Command C - Set all lights to 0 and set the specified group to the specified value")
+            
+        elif chr(data[0]) == "D": #Set additive group to value
+            debug("Command D - Maintain current light configuration and adjust the specified group to the specified value")
+
         else:
             print("Unrecognised command")
             print(data)
