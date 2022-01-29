@@ -168,6 +168,8 @@ set_group_duties(led_groups[current_group])
 #Configure PWM outputs
 set_led_duties()
 
+groupConfigInSync = True
+
 data = []
 i2c_data = []
 string = ""
@@ -175,6 +177,8 @@ string = ""
 #Main program loop
 debug("Starting program loop")
 while True:
+    #TODO set groupConfigInSync = False if group config changed since last master sync request
+    
     #check for I2C data
     i2c_data = read_i2c(i2c_port)
     if i2c_data:
@@ -215,29 +219,37 @@ while True:
         elif data[0] == 3: #Set exclusive group to value
             debug("Command 3 - Set all lights to 0 and set the specified group to the specified value")
 
-            groupID = data[1]
-            debug(groupID)
-            ledDuty = int(data[2] * max_duty / 255)
-            debug(data[2])
-            debug(ledDuty)
+            if groupConfigInSync:
+                groupID = data[1]
+                debug(groupID)
+                ledDuty = int(data[2] * max_duty / 255)
+                debug(data[2])
+                debug(ledDuty)
 
-            set_all_zero()
-            set_group_duties(groupID, ledDuty)
+                set_all_zero()
+                set_group_duties(led_groups[groupID], ledDuty)
 
-            set_led_duties()
-            
+                set_led_duties()
+
+            else:
+                print("Group config not in sync")
+
         elif data[0] == 4: #Set additive group to value
             debug("Command 4 - Maintain current light configuration and adjust the specified group to the specified value")
 
-            groupID = data[1]
-            debug(groupID)
-            ledDuty = int(data[2] * max_duty / 255)
-            debug(data[2])
-            debug(ledDuty)
+            if groupConfigInSync:
+                groupID = data[1]
+                debug(groupID)
+                ledDuty = int(data[2] * max_duty / 255)
+                debug(data[2])
+                debug(ledDuty)
 
-            set_group_duties(groupID, ledDuty)
+                set_group_duties(led_groups[groupID], ledDuty)
 
-            set_led_duties()
+                set_led_duties()
+                
+            else:
+                print("Group config not in sync")
 
         else:
             print("Unrecognised command")
