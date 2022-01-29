@@ -152,16 +152,16 @@ global leds
 leds = {0: ext_led0, 1: ext_led1, 2: ext_led2, 3: ext_led3, 4: ext_led4, 5: ext_led5, 6: ext_led6, 7: ext_led7, 8: ext_led8, 9: ext_led9, 10: ext_led10, 11: ext_led11, 12: ext_led12, 13: ext_led13, 14: ext_led4, 15: ext_led15}
 
 #Define LED groups
-led_groups = {1: {"label": "All", "members": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]}, 2: {"label": "All white", "members": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}, 3: {"label": "All red", "members": [11, 12]}, 4: {"label": "saloon", "members": [1, 2, 3, 4, 5]}}
+led_groups = {0: {"label": "All", "members": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]}, 1: {"label": "All white", "members": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]}, 2: {"label": "All red", "members": [10, 11]}, 3: {"label": "saloon", "members": [0, 1, 2, 3, 4]}}
 
 #Set default LED duties
 #TODO maybe a constructor makes this from enabled LEDs and value = 0 or max for default group
 global led_duty
-led_duty = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0, 10: 0, 11: 0, 12: 0, 13: 0, 14: 0, 15: 0, 16: 0}
+led_duty = {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0, 10: 0, 11: 0, 12: 0, 13: 0, 14: 0, 15: 0}
 
 #TODO read default group and values from persistent storage/server
 #Default selected group
-current_group = 4
+current_group = 3
 #Set LEDs in default group on
 set_group_duties(led_groups[current_group])
 
@@ -178,8 +178,6 @@ string = ""
 debug("Starting program loop")
 while True:
     error = False
-    data = []
-    string = ""
     
     #TODO set groupConfigInSync = False if group config changed since last master sync request
     
@@ -188,13 +186,15 @@ while True:
     if i2c_data:
         for byte in i2c_data:
             data.append(byte)
+        debug("received I2C data")
         debug(i2c_data)
 
     elif data:
         debug("I2C data read into buffer")
         
         #01GRIIII Set LED values
-        if data[0] & 64: #Set a value comand resgister
+        if data[0] & 0b01000000: #Set a value command register
+            debug("Command: Setting a light value")
             
             id = data[0] & 0b00001111
             debug(id)
@@ -207,14 +207,18 @@ while True:
                 set_all_zero()
             
             if data[0] & 0b00100000: #group config
+                debug("Group config")
                 if groupConfigInSync:
                     set_group_duties(led_groups[id], ledDuty)
+                    debug("Setting group ID")
+                    debug(led_groups[id])
                             
                 else:
                     print("ERROR: Group config not in sync")
                     error = True
                 
             else:
+                debug("Light config")
                 led_duty[id] = ledDuty #Single light config
 
             if not error:
@@ -229,6 +233,9 @@ while True:
             for byte in data:
                 string = string + chr(byte)
             print("ASCII: {}".format(string))
+            string = ""    
+        
+        data = []
             
     else:
         pass
