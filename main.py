@@ -44,7 +44,7 @@ def flash(led, count, pause=1):
 
 def start_serial():
     serial = UART(1, baudrate=115200, tx=Pin(4), rx=Pin(5))
-    print(serial)
+    debug(serial)
     return serial
 
 def send_serial(serial, serialdata):
