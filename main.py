@@ -240,9 +240,13 @@ while True:
                 debug(jsonData)
                 length = len(jsonData)
                 returnData = (length).to_bytes(2,"big")
-                debug("length of json data:")
+                debug("length of data:")
                 debug(returnData)
                 send_i2c(i2c_port, returnData)
+                i2cSendData = bytearray(jsonData)
+                debug(i2cSendData)
+                send_i2c(i2c_port, i2cSendData)
+                groupConfigInSync = True
 
             else:
                 debug("Unrecognised get/set config command")
