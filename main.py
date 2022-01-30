@@ -62,22 +62,17 @@ def read_i2c(i2c_port):
     else:
         return False
 
-#Try and send data on I2C bus
-def i2c_send(i2c_port, send_data):
-    if i2c_port.read_is_pending:
+#Send data on I2C bus
+#TODO create interrupt timer to break out if no read requested in X
+def send_i2c(i2c_port, send_data):
+    debug("Entering I2C send")
+    for value in send_data:
+        debug("Entering I2C send loop")
+        while not i2c_port.read_is_pending():
+            pass
+        i2c_port.put_read_data(value)
         flash(led, 3, 1)
-
-        debug("Sending data: " + send_data)
-        
-        for value in send_data:
-            i2c_port.put_read_data(value)
-        
-        debug("Sent data: " + send_data)
-
-        return 0
-    
-    else:
-        return -1
+        debug("I2C value sent")
 
 #Configure duties for a group
 def set_group_duties(group, duty=max_duty):
@@ -192,6 +187,8 @@ while True:
     elif data:
         debug("I2C data read into buffer")
         
+        returnByte = 0
+
         #01GRIIII Set LED values
         if data[0] & 0b01000000: #Set a value command register
             debug("Command: Setting a light value")
@@ -215,17 +212,18 @@ while True:
                             
                 else:
                     print("ERROR: Group config not in sync")
-                    error = True
+                    returnByte = returnByte + 0b00000010
                 
             else:
                 debug("Light config")
                 led_duty[id] = ledDuty #Single light config
 
-            if not error:
+            if returnByte == 0:
                 set_led_duties()
             
             else:
                 print ("Set command not applied due to error")
+                print(returnByte)
         
         else:
             print("Unrecognised command")
@@ -233,8 +231,13 @@ while True:
             for byte in data:
                 string = string + chr(byte)
             print("ASCII: {}".format(string))
-            string = ""    
+            string = ""
+
+            returnByte = returnByte + 0b00000010
         
+        #TODO returncode over I2C
+        send_i2c(i2c_port, returnByte)
+
         data = []
             
     else:
