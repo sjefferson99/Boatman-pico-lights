@@ -109,6 +109,7 @@ GPIO_RESPONDER_SCL = 17
 # Initialize I2C Responder
 debug("Init I2C")
 i2c_port = I2CResponder(RESPONDER_I2C_DEVICE_ID, sda_gpio=GPIO_RESPONDER_SDA, scl_gpio=GPIO_RESPONDER_SCL, responder_address=RESPONDER_ADDRESS)
+debug(i2c_port)
 
 #Init LED
 debug("Init board LED")
@@ -168,6 +169,7 @@ groupConfigInSync = True
 data = []
 i2c_data = []
 string = ""
+i2cSendData = []
 
 #Main program loop
 debug("Starting program loop")
@@ -236,8 +238,10 @@ while True:
             returnByte = returnByte + 0b00000010
         
         #TODO returncode over I2C
-        send_i2c(i2c_port, returnByte)
-
+        i2cSendData.append(returnByte)
+        send_i2c(i2c_port, i2cSendData)
+        
+        i2cSendData = []
         data = []
             
     else:
