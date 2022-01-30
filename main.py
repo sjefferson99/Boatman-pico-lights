@@ -6,8 +6,8 @@ from machine import PWM
 import json
 
 global debugEnable
-#debugEnable = False
-debugEnable = True
+debugEnable = False
+#debugEnable = True
 
 #100% on duty value
 global max_duty
@@ -119,7 +119,7 @@ flash(led, 1)
 led.off()
 
 #LED-pwm config
-print("init external LEDs")
+debug("init external LEDs")
 ext_led0 = PWM(Pin(0))
 ext_led0.freq(1000)
 ext_led1 = PWM(Pin(1))
@@ -214,7 +214,7 @@ while True:
                     debug(led_groups[id])
                             
                 else:
-                    print("ERROR: Group config not in sync")
+                    debug("ERROR: Group config not in sync")
                     returnByte = returnByte + 0b00000010
                 
             else:
@@ -225,8 +225,8 @@ while True:
                 set_led_duties()
             
             else:
-                print ("Set command not applied due to error")
-                print(returnByte)
+                debug("Set command not applied due to error")
+                debug(returnByte)
                 
             i2cSendData.append(returnByte)
             send_i2c(i2c_port, i2cSendData)
