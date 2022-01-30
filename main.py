@@ -19,8 +19,8 @@ def debug(message):
     if debugEnable:
         print(message)
 
+#Format a value or list of values as 2 digit hex.
 def format_hex(_object):
-    """Format a value or list of values as 2 digit hex."""
     try:
         values_hex = [to_hex(value) for value in _object]
         return '[{}]'.format(', '.join(values_hex))
@@ -165,35 +165,46 @@ set_group_duties(led_groups[current_group])
 #Configure PWM outputs
 set_led_duties()
 
+#Force config sync before group based commands
 groupConfigInSync = False
 
+#Init program loop vars
 data = []
 i2c_data = []
 string = ""
 i2cSendData = []
+error = False
 
 #Main program loop
 debug("Starting program loop")
+
 while True:
-    error = False
-    
-    #TODO set groupConfigInSync = False if group config changed since last master sync request
-    
-    #check for I2C data
+        
+    ################################################################
+    #check for I2C data - Load into data var until transfer complete
+    ################################################################
     i2c_data = read_i2c(i2c_port)
     if i2c_data:
         for byte in i2c_data:
-            data.append(byte)
+            data.append(byte) # 
         debug("received I2C data")
         debug(i2c_data)
 
+    ##########################################################################
+    #When no buffer data pending and data var contains command data to process
+    ##########################################################################
     elif data:
         debug("I2C data read into buffer")
         
         returnByte = 0
 
-        #01GRIIII Set LED values
-        if data[0] & 0b01000000: #Set a value command register
+        ####################
+        #Set a value command
+        ####################
+        if data[0] & 0b01000000:
+            #b1:01GRIIII Set LED values (G=Group, R=Reset, I=ID)
+            #b2:DDDDDDDD (D=Duty)
+
             debug("Command: Setting a light or group value")
             
             id = data[0] & 0b00001111
@@ -221,17 +232,23 @@ while True:
                 debug("Light config")
                 led_duty[id] = ledDuty #Single light config
 
+            #Apply PWM to generators if no errors
             if returnByte == 0:
                 set_led_duties()
             
+            #Any error in configuring PWM
             else:
                 debug("Set command not applied due to error")
                 debug(returnByte)
-                
+
+            #Return error code to master on "set" command execution
             i2cSendData.append(returnByte)
             send_i2c(i2c_port, i2cSendData)
 
-        elif data[0] & 0b10000000: #Get / set config data
+        ######################
+        #Get / set config data
+        ######################
+        elif data[0] & 0b10000000:
             debug("Command: Get / set config data")
 
             if data[0] & 0b00000001: #Get group configs
@@ -251,10 +268,13 @@ while True:
             else:
                 debug("Unrecognised get/set config command")
                 debug(data)
-                returnByte = returnByte + 0b00000001
+                returnByte = returnByte + 0b00000011
                 i2cSendData.append(returnByte)
                 send_i2c(i2c_port, i2cSendData)
         
+        #############################
+        #Totally unrecognised command
+        #############################
         else:
             print("Unrecognised command")
             print(data)
@@ -262,16 +282,17 @@ while True:
                 string = string + chr(byte)
             print("ASCII: {}".format(string))
             string = ""
-
             returnByte = returnByte + 0b00000001
-
             i2cSendData.append(returnByte)
             send_i2c(i2c_port, i2cSendData)
         
+        #reset progream loop vars
         debug("clearing data vars")
         i2cSendData = []
         data = []
+        error = False
             
+    #Nothing to do this loop
     else:
         pass
     
@@ -281,5 +302,3 @@ while True:
     if serialdata == b'quit':
         debug("quitting")
         break
-    
-    #debug("looping")
