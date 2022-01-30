@@ -194,7 +194,7 @@ while True:
 
         #01GRIIII Set LED values
         if data[0] & 0b01000000: #Set a value command register
-            debug("Command: Setting a light value")
+            debug("Command: Setting a light or group value")
             
             id = data[0] & 0b00001111
             debug(id)
@@ -227,23 +227,27 @@ while True:
             else:
                 print ("Set command not applied due to error")
                 print(returnByte)
+                
+            i2cSendData.append(returnByte)
+            send_i2c(i2c_port, i2cSendData)
 
-        if data[0] & 0b10000000: #Get / set config data
+        elif data[0] & 0b10000000: #Get / set config data
             debug("Command: Get / set config data")
 
             if data[0] & 0b00000001: #Get group configs
                 debug("Command: Get group configs")
-                jsondata = json.dumps(led_groups)
-                returnbyte = len(jsondata)
+                jsonData = json.dumps(led_groups)
+                debug(jsonData)
+                length = len(jsonData)
+                returnData = (length).to_bytes(2,"big")
                 debug("length of json data:")
-                debug(i2cSendData)
-                i2cSendData.append(returnByte)
-                send_i2c(i2c_data, i2cSendData)
+                debug(returnData)
+                send_i2c(i2c_port, returnData)
 
             else:
-                debug("Unrecognised command")
+                debug("Unrecognised get/set config command")
                 debug(data)
-                returnByte = returnByte + 0b00000010
+                returnByte = returnByte + 0b00000001
                 i2cSendData.append(returnByte)
                 send_i2c(i2c_port, i2cSendData)
         
@@ -255,11 +259,12 @@ while True:
             print("ASCII: {}".format(string))
             string = ""
 
-            returnByte = returnByte + 0b00000010
+            returnByte = returnByte + 0b00000001
 
             i2cSendData.append(returnByte)
             send_i2c(i2c_port, i2cSendData)
         
+        debug("clearing data vars")
         i2cSendData = []
         data = []
             
