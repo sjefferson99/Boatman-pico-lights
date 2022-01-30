@@ -74,6 +74,11 @@ def send_i2c(i2c_port, send_data):
         i2c_port.put_read_data(value)
         flash(led, 3, 1)
         debug("I2C value sent")
+    
+    #Keep sending 0s to unlock master code execution if byte mismatch
+    while i2c_port.read_is_pending():
+        debug("entering padding while loop - check byte mismatch")
+        i2c_port.put_read_data(0)
 
 #Configure duties for a group
 def set_group_duties(group, duty=max_duty):
