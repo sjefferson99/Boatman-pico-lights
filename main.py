@@ -3,6 +3,7 @@ from i2c_responder import I2CResponder
 from time import sleep, sleep_ms
 from machine import UART
 from machine import PWM
+import json
 
 global debugEnable
 #debugEnable = False
@@ -164,7 +165,7 @@ set_group_duties(led_groups[current_group])
 #Configure PWM outputs
 set_led_duties()
 
-groupConfigInSync = True
+groupConfigInSync = False
 
 data = []
 i2c_data = []
@@ -226,6 +227,25 @@ while True:
             else:
                 print ("Set command not applied due to error")
                 print(returnByte)
+
+        if data[0] & 0b10000000: #Get / set config data
+            debug("Command: Get / set config data")
+
+            if data[0] & 0b00000001: #Get group configs
+                debug("Command: Get group configs")
+                jsondata = json.dumps(led_groups)
+                returnbyte = len(jsondata)
+                debug("length of json data:")
+                debug(i2cSendData)
+                i2cSendData.append(returnByte)
+                send_i2c(i2c_data, i2cSendData)
+
+            else:
+                debug("Unrecognised command")
+                debug(data)
+                returnByte = returnByte + 0b00000010
+                i2cSendData.append(returnByte)
+                send_i2c(i2c_port, i2cSendData)
         
         else:
             print("Unrecognised command")
@@ -236,10 +256,9 @@ while True:
             string = ""
 
             returnByte = returnByte + 0b00000010
-        
-        #TODO returncode over I2C
-        i2cSendData.append(returnByte)
-        send_i2c(i2c_port, i2cSendData)
+
+            i2cSendData.append(returnByte)
+            send_i2c(i2c_port, i2cSendData)
         
         i2cSendData = []
         data = []
