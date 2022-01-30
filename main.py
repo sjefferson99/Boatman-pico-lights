@@ -6,7 +6,7 @@ from machine import PWM
 import json
 
 global debugEnable
-debugEnable = False
+debugEnable = True
 #debugEnable = True
 
 #100% on duty value
@@ -75,10 +75,8 @@ def send_i2c(i2c_port, send_data):
         flash(led, 3, 1)
         debug("I2C value sent")
     
-    #Keep sending 0s to unlock master code execution if byte mismatch
-    while i2c_port.read_is_pending():
-        debug("entering padding while loop - check byte mismatch")
-        i2c_port.put_read_data(0)
+    #TODO timer based interrupt if read still high to break out of byte mismatch
+    #While loop on read still active injects 0s that breaks stuff where no byte mismatch
 
 #Configure duties for a group
 def set_group_duties(group, duty=max_duty):
