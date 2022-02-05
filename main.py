@@ -39,7 +39,8 @@ def flash(led, count, pause=1):
         led.on()
         sleep_ms(pause)
         led.off()
-        sleep_ms(pause)
+        if count > 1:
+            sleep_ms(pause)
         j += 1
 
 def start_serial():
@@ -54,7 +55,6 @@ def send_serial(serial, serialdata):
 #Read I2C if data available - return data up to 8 bytes from I2C input buffer or False if no data
 def read_i2c(i2c_port):
     if i2c_port.write_data_is_available():
-        flash(led, 2, 1)
 
         buffer_in = i2c_port.get_write_data(max_size=8) #returns list of bytes
                 
@@ -72,7 +72,6 @@ def send_i2c(i2c_port, send_data):
         while not i2c_port.read_is_pending():
             pass
         i2c_port.put_read_data(value)
-        flash(led, 3, 1)
         debug("I2C value sent")
     
     #TODO timer based interrupt if read still high to break out of byte mismatch
@@ -188,6 +187,7 @@ while True:
     ################################################################
     i2c_data = read_i2c(i2c_port)
     if i2c_data:
+        flash(led, 1)
         for byte in i2c_data:
             data.append(byte) # 
         debug("received I2C data")
@@ -247,6 +247,7 @@ while True:
             #Return error code to master on "set" command execution
             i2cSendData.append(returnByte)
             send_i2c(i2c_port, i2cSendData)
+            flash(led, 1)
 
         ######################
         #Get / set config data
@@ -263,9 +264,11 @@ while True:
                 debug("length of data:")
                 debug(returnData)
                 send_i2c(i2c_port, returnData)
+                flash(led, 1)
                 i2cSendData = bytearray(jsonData)
                 debug(i2cSendData)
                 send_i2c(i2c_port, i2cSendData)
+                flash(led, 1)
                 groupConfigInSync = True
 
             else:
@@ -274,6 +277,7 @@ while True:
                 returnByte = returnByte + 0b00000011
                 i2cSendData.append(returnByte)
                 send_i2c(i2c_port, i2cSendData)
+                flash(led, 1)
         
         #############################
         #Totally unrecognised command
@@ -288,6 +292,7 @@ while True:
             returnByte = returnByte + 0b00000001
             i2cSendData.append(returnByte)
             send_i2c(i2c_port, i2cSendData)
+            flash(led, 1)
         
         #reset progream loop vars
         debug("clearing data vars")
