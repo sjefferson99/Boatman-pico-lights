@@ -62,7 +62,7 @@ class I2CResponder:
 
     def write_reg(self, register_offset, data, method=0):
         """Write Pico register."""
-        mem32[self.i2c_base | method | register_offset] = data
+        mem32[self.i2c_base | method | register_offset] = data # type: ignore
 
     def set_reg(self, register_offset, data):
         """Set bits in Pico register."""
@@ -104,23 +104,23 @@ class I2CResponder:
             ),
         )
         # Configure SDA PIN to select "I2C" function
-        mem32[
+        mem32[ # type: ignore
             self.IO_BANK0_BASE
             | self.REG_ACCESS_METHOD_CLR
             | (self.GPIOxCTRL + self.GPIO_REGISTER_BLOCK_SIZE * self.sda_gpio)
         ] = self.GPIOxCTRL__FUNCSEL
-        mem32[
+        mem32[ # type: ignore
             self.IO_BANK0_BASE
             | self.REG_ACCESS_METHOD_SET
             | (self.GPIOxCTRL + self.GPIO_REGISTER_BLOCK_SIZE * self.sda_gpio)
         ] = self.GPIOxCTRL__FUNCSEL__I2C
         # Configure SCL PIN to select "I2C" function
-        mem32[
+        mem32[ # type: ignore
             self.IO_BANK0_BASE
             | self.REG_ACCESS_METHOD_CLR
             | (self.GPIOxCTRL + self.GPIO_REGISTER_BLOCK_SIZE * self.scl_gpio)
         ] = self.GPIOxCTRL__FUNCSEL
-        mem32[
+        mem32[ # type: ignore
             self.IO_BANK0_BASE
             | self.REG_ACCESS_METHOD_SET
             | (self.GPIOxCTRL + self.GPIO_REGISTER_BLOCK_SIZE * self.scl_gpio)
@@ -135,7 +135,7 @@ class I2CResponder:
         I2C READ, which means that its I2C engine is currently blocking
         waiting for us to respond with the requested I2C READ data.
         """
-        status = mem32[self.i2c_base | self.IC_RAW_INTR_STAT] & self.IC_RAW_INTR_STAT__RD_REQ
+        status = mem32[self.i2c_base | self.IC_RAW_INTR_STAT] & self.IC_RAW_INTR_STAT__RD_REQ # type: ignore
         return bool(status)
 
     def put_read_data(self, data):
@@ -149,8 +149,8 @@ class I2CResponder:
         """
         # reset flag
         self.clr_reg(self.IC_CLR_TX_ABRT, self.IC_CLR_TX_ABRT__CLR_TX_ABRT)
-        status = mem32[self.i2c_base | self.IC_CLR_RD_REQ]
-        mem32[self.i2c_base | self.IC_DATA_CMD] = data & 0xFF
+        status = mem32[self.i2c_base | self.IC_CLR_RD_REQ] # type: ignore
+        mem32[self.i2c_base | self.IC_DATA_CMD] = data & 0xFF # type: ignore
 
     def write_data_is_available(self):
         """Check whether incoming (I2C WRITE) data is available.
@@ -159,7 +159,7 @@ class I2CResponder:
             True if data is available, False otherwise.
         """
         # get IC_STATUS
-        status = mem32[self.i2c_base | self.IC_STATUS]
+        status = mem32[self.i2c_base | self.IC_STATUS] # type: ignore
         # Check RFNE (Receive FIFO not empty)
         if status & self.IC_STATUS__RFNE:
             # There is data in the Zx FIFO
@@ -179,5 +179,5 @@ class I2CResponder:
         """
         data = []
         while len(data) < max_size and self.write_data_is_available():
-            data.append(mem32[self.i2c_base | self.IC_DATA_CMD] & 0xFF)
+            data.append(mem32[self.i2c_base | self.IC_DATA_CMD] & 0xFF) # type: ignore
         return data

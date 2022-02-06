@@ -5,9 +5,9 @@ from machine import UART
 from machine import PWM
 import json
 
+#Enables printing debug messages
 global debugEnable
 debugEnable = True
-#debugEnable = True
 
 #100% on duty value
 global max_duty
@@ -265,7 +265,7 @@ while True:
                 debug(returnData)
                 send_i2c(i2c_port, returnData)
                 flash(led, 1)
-                i2cSendData = bytearray(jsonData)
+                i2cSendData = bytearray(jsonData) # type: ignore
                 debug(i2cSendData)
                 send_i2c(i2c_port, i2cSendData)
                 flash(led, 1)
