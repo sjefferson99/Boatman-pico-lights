@@ -148,7 +148,7 @@ ext_led14.freq(1000)
 ext_led15 = PWM(Pin(21))
 
 global leds
-leds = {0: ext_led0, 1: ext_led1, 2: ext_led2, 3: ext_led3, 4: ext_led4, 5: ext_led5, 6: ext_led6, 7: ext_led7, 8: ext_led8, 9: ext_led9, 10: ext_led10, 11: ext_led11, 12: ext_led12, 13: ext_led13, 14: ext_led4, 15: ext_led15}
+leds = {0: ext_led0, 1: ext_led1, 2: ext_led2, 3: ext_led3, 4: ext_led4, 5: ext_led5, 6: ext_led6, 7: ext_led7, 8: ext_led8, 9: ext_led9, 10: ext_led10, 11: ext_led11, 12: ext_led12, 13: ext_led13, 14: ext_led14, 15: ext_led15}
 
 #Define LED groups
 led_groups = {0: {"label": "All", "members": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]}, 1: {"label": "All white", "members": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]}, 2: {"label": "All red", "members": [10, 11]}, 3: {"label": "saloon", "members": [0, 1, 2, 3, 4]}}
@@ -232,7 +232,7 @@ while True:
                     returnByte = returnByte + 0b00000010
                 
             else:
-                debug("Light config")
+                debug("Single light config")
                 led_duty[id] = ledDuty #Single light config
 
             #Apply PWM to generators if no errors
