@@ -260,7 +260,8 @@ while True:
 
             if data[0] & 0b00000001: #Get module ID
                 debug("Command: Get module ID")
-                send_i2c(i2c_port, module_id)
+                i2cSendData.append(module_id)
+                send_i2c(i2c_port, i2cSendData)
 
             elif data[0] & 0b00000010: #Get group configs
                 debug("Command: Get group configs")
