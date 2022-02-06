@@ -263,7 +263,12 @@ while True:
                 i2cSendData.append(module_id)
                 send_i2c(i2c_port, i2cSendData)
 
-            elif data[0] & 0b00000010: #Get group configs
+            elif data[0] & 0b00000010: #Get version
+                debug("Command: Get version")
+                i2cSendData.append(version)
+                send_i2c(i2c_port, i2cSendData)
+
+            elif data[0] & 0b00000011: #Get group configs
                 debug("Command: Get group configs")
                 jsonData = json.dumps(led_groups)
                 debug(jsonData)
