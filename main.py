@@ -13,6 +13,9 @@ debugEnable = True
 global max_duty
 max_duty = 65025
 
+version = str("0.1")
+module_id = 0b00000010
+
 #Deals with debug messages appropriately
 def debug(message):
     #TODO Support UART output (unsure if toggle signalk/debug or put debug into signalk format)
@@ -255,7 +258,11 @@ while True:
         elif data[0] & 0b10000000:
             debug("Command: Get / set config data")
 
-            if data[0] & 0b00000001: #Get group configs
+            if data[0] & 0b00000001: #Get module ID
+                debug("Command: Get module ID")
+                send_i2c(i2c_port, module_id)
+
+            elif data[0] & 0b00000010: #Get group configs
                 debug("Command: Get group configs")
                 jsonData = json.dumps(led_groups)
                 debug(jsonData)
