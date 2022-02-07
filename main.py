@@ -258,17 +258,17 @@ while True:
         elif data[0] & 0b10000000:
             debug("Command: Get / set config data")
 
-            if data[0] & 0b00000001: #Get module ID
+            if data[0] == 0b00000001: #Get module ID
                 debug("Command: Get module ID")
                 i2cSendData.append(module_id)
                 send_i2c(i2c_port, i2cSendData)
 
-            elif data[0] & 0b00000010: #Get version
+            elif data[0] == 0b00000010: #Get version
                 debug("Command: Get version")
                 i2cSendData = bytearray(version) #type: ignore
                 send_i2c(i2c_port, i2cSendData)
 
-            elif data[0] & 0b00000011: #Get group configs
+            elif data[0] == 0b00000011: #Get group configs
                 debug("Command: Get group configs")
                 jsonData = json.dumps(led_groups)
                 debug(jsonData)
