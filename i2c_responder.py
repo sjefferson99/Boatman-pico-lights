@@ -1,7 +1,10 @@
 from machine import mem32
 
 class I2CResponder:
-    """Implementation of a (polled) Raspberry Pico I2C Responder.
+    """
+    Module forked from empoyer at https://github.com/epmoyer/I2CResponder
+    
+    Implementation of a (polled) Raspberry Pico I2C Responder.
 
     NOTE: This module uses I2C Controller/Responder nomenclature per
           https://www.eetimes.com/its-time-for-ieee-to-retire-master-slave/
