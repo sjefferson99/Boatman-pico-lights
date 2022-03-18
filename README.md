@@ -17,5 +17,5 @@ A pico hub module performs the role of I2C master and depending on the hub will 
 (TBC)
 
 ## Hardware
-Raspberry Pi Pico: [Pi hut pico](https://thepihut.com/products/raspberry-pi-pico)
-MOSFET PWM Drivers: [Amazon Mosfet with connectors on PCB](https://www.amazon.co.uk/gp/product/B07QVZK39F/ref=ppx_yo_dt_b_asin_title_o05_s00?ie=UTF8&psc=1)
+- Raspberry Pi Pico: [Pi hut pico](https://thepihut.com/products/raspberry-pi-pico)
+- MOSFET PWM Drivers: [Amazon Mosfet with connectors on PCB](https://www.amazon.co.uk/gp/product/B07QVZK39F/ref=ppx_yo_dt_b_asin_title_o05_s00?ie=UTF8&psc=1)
