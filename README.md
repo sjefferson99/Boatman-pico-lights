@@ -46,14 +46,20 @@ The commands are constructed as a 1 byte command with supplementary data bytes a
 #### 0b00xxxxxx: Reserved
 #### 0b01xxxxxx: Get/set light values
 0b01GRIIII 0bDDDDDDDD - set light or light group duty cycle
+<br>
 G: 1 = Group, 0 = Individual light
+<br>
 R: 1 = Reset other lights to duty cyle of 0, 0 = update only this target
+<br>
 IIII = 4 bit Light or Group ID
+<br>
 DDDDDDDD = 0-255 Duty cycle value 0 = off, 255 = fully on
 
 #### 0b1xxxxxxx: Get/set config data
 0b10000001: Get module ID - Pico lights should return 0b00000010
+<br>
 0b10000010: Get version
+<br>
 0b10000011: Get group assignments
 
 ### I2C command expected data return
