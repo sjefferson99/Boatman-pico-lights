@@ -13,7 +13,7 @@ debugEnable = True
 global max_duty
 max_duty = 65025
 
-version = str("0.1")
+version = str("0.2.0")
 module_id = 0b00000010
 
 #Deals with debug messages appropriately
@@ -265,8 +265,15 @@ while True:
 
             elif data[0] == 0b10000010: #Get version
                 debug("Command: Get version")
+                length = len(version)
+                returnData = (length).to_bytes(1,"big")
+                debug("length of data:")
+                debug(returnData)
+                send_i2c(i2c_port, returnData)
+                flash(led, 1)
                 i2cSendData = bytearray(version) #type: ignore
                 send_i2c(i2c_port, i2cSendData)
+                flash(led, 1)
 
             elif data[0] == 0b10000011: #Get group configs
                 debug("Command: Get group configs")
