@@ -1,4 +1,4 @@
-# Boatman Pico Light module v0.2.0
+# Boatman Pico Light module v0.2.1
 
 ## Overview
 The Boatman pico lights module forms part of a wider Boatman ecosystem documented in the [Boatman project repository](https://github.com/sjefferson99/Boatman-project)
