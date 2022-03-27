@@ -257,7 +257,7 @@ class pico_light_controller:
         #Get group configs
         elif data[0] == 0b10000011:
             self.debug.print("Command: Get group configs")
-            jsonData = dumps(self.led_groups, sort_keys=True)
+            jsonData = dumps(self.led_groups)
             self.debug.print(jsonData)
             i2cSendData = bytearray(jsonData, 'utf-8')
             self.send_i2c_multibyte(i2cSendData, 2)
