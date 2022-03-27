@@ -119,9 +119,11 @@ class pico_light_controller:
                     
         return buffer_in
 
-    def send_i2c(self, send_data: bytearray) -> None:
+    def send_i2c(self, send_data: list | bytearray) -> None:
         # TODO create interrupt timer to break out if no read requested in X
         self.debug.print("Entering I2C send")
+        self.debug.print("Sending this data: ")
+        self.debug.print(str(send_data))
         for value in send_data:
             self.debug.print("Entering I2C send loop")
             while not self.i2c1.read_is_pending():
@@ -241,8 +243,8 @@ class pico_light_controller:
         #Get module ID
         if data[0] == 0b10000001:
             self.debug.print("Command: Get module ID")
-            self.debug.print(str(self.module_id_byte))
-            i2cSendData = bytearray(self.module_id_byte)
+            self.debug.print(str(self.moduleID))
+            i2cSendData.append(self.moduleID)
             self.send_i2c(i2cSendData)
 
         #Get version
