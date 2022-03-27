@@ -65,7 +65,7 @@ DDDDDDDD = 0-255 Duty cycle value 0 = off, 255 = fully on
 ### I2C command expected data return
 - 0b01xxxxxx: Get/set light values - 1 byte
   - 0: Success
-  - 1: Command not recognised
+  - 1: Received reserved command
   - 2: Group config out of sync (only on group set command, issue a group sync command)
   - 10: Group ID out of range (only on group set command)
   - 20: Duty value out of range
