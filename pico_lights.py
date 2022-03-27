@@ -182,7 +182,7 @@ class pico_light_controller:
                 print (led)
 
     # Set lights or group of lights to duty value
-    def set_lights(self, data: list) -> bytearray:
+    def set_lights(self, data: list) -> list:
         """
         Set light or group of lights to specifed duty as defined in the lights command protocol
         Returns error code sent on I2C bus
@@ -229,7 +229,7 @@ class pico_light_controller:
             self.debug.print(str(returnByte))
 
         #Return error code to master on "set" command execution
-        i2cSendData=bytearray(returnByte)
+        i2cSendData.append(returnByte)
         self.send_i2c(i2cSendData)
 
         return i2cSendData
