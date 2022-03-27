@@ -1,4 +1,4 @@
-# Boatman Pico Light module v0.1
+# Boatman Pico Light module v0.3.0
 
 ## Overview
 The Boatman pico lights module forms part of a wider Boatman ecosystem documented in the [Boatman project repository](https://github.com/sjefferson99/Boatman-project)
@@ -65,13 +65,14 @@ DDDDDDDD = 0-255 Duty cycle value 0 = off, 255 = fully on
 ### I2C command expected data return
 - 0b01xxxxxx: Get/set light values - 1 byte
   - 0: Success
-  - 1: Command not recognised
+  - 1: Received reserved command
   - 2: Group config out of sync (only on group set command, issue a group sync command)
+  - 3: Unrecognised get/set config command
   - 10: Group ID out of range (only on group set command)
   - 20: Duty value out of range
   - 30: Group ID not in local config
 - 0b10000001: Get module ID - 1 byte - 0b00000010
-- 0b10000010: Get version - 3 bytes - decode as ansi string e.g. "0.1"
+- 0b10000010: Get version - 1 byte big endian defining payload length - immediate send of version string, decode as ansi string e.g. "0.2.0"
 - 0b10000011: Get group assignments - 2 bytes big endian defining payload length - immediate send of JSON of that length that can be fed into python json.loads(). This is a python dictionary for use in set light group command.
 
 ## Hardware
