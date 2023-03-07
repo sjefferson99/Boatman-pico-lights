@@ -1,3 +1,5 @@
+# Archived project - This functionality is now being continued in https://github.com/sjefferson99/pico-boat-assistant
+
 # Boatman Pico Light module v0.3.0
 
 ## Overview
